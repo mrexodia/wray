@@ -10,7 +10,8 @@ import (
 )
 
 type HttpTransport struct {
-	url string
+	url      string
+	SendHook func(data map[string]interface{})
 }
 
 func (self HttpTransport) isUsable(clientUrl string) bool {
@@ -29,6 +30,9 @@ func (self HttpTransport) connectionType() string {
 }
 
 func (self HttpTransport) send(data map[string]interface{}) (Response, error) {
+	if self.SendHook != nil {
+		self.SendHook(data)
+	}
 	dataBytes, _ := json.Marshal(data)
 	buffer := bytes.NewBuffer(dataBytes)
 	responseData, err := http.Post(self.url, "application/json", buffer)
